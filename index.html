@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AskVote — Live audience engagement for events</title>
+  <meta name="description" content="Give your event audiences a voice with live polls and Q&A. Attendees vote from their phone. You get real engagement data. No app to install. Pay per event.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand: #0F766E; --brand-light: #14B8A6; --brand-dark: #0D5E58; --brand-bg: #F0FDFA;
+      --accent: #EA580C; --accent-hover: #C2410C; --accent-bg: #FFF7ED;
+      --g50: #F9FAFB; --g100: #F3F4F6; --g200: #E5E7EB; --g300: #D1D5DB;
+      --g400: #9CA3AF; --g500: #6B7280; --g600: #4B5563; --g700: #374151;
+      --g800: #1F2937; --g900: #111827; --white: #FFFFFF;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', -apple-system, sans-serif; color: var(--g700); line-height: 1.6; background: var(--white); -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    .cta-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 15px 32px; border-radius: 8px; font-size: 16px; font-weight: 700;
+      text-decoration: none; cursor: pointer; border: none; font-family: inherit;
+      background: var(--accent); color: white;
+      box-shadow: 0 2px 4px rgba(234,88,12,0.2), 0 8px 20px rgba(234,88,12,0.12);
+      transition: all 0.15s;
+    }
+    .cta-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .cta-sm { padding: 12px 24px; font-size: 14px; }
+    .cta-sub { font-size: 12px; color: var(--g400); margin-top: 8px; }
+
+    /* HERO */
+    .hero { padding: 72px 0 32px; text-align: center; }
+    .wordmark { font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; justify-content: center; gap: 7px; margin-bottom: 28px; }
+    .wm-icon { width: 28px; height: 28px; background: var(--brand); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+    .hero h1 { font-size: clamp(28px, 5vw, 44px); font-weight: 800; line-height: 1.15; color: var(--g900); max-width: 540px; margin: 0 auto 14px; letter-spacing: -0.025em; }
+    .hero .lead { font-size: 17px; color: var(--g500); max-width: 420px; margin: 0 auto 28px; }
+
+    /* BROWSER */
+    .browser { background: var(--g900); border-radius: 12px; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(0,0,0,0.2); }
+    .bbar { display: flex; align-items: center; gap: 8px; padding: 11px 16px; background: var(--g800); }
+    .bdots { display: flex; gap: 6px; }
+    .bdots span { width: 10px; height: 10px; border-radius: 50%; }
+    .bdots span:nth-child(1) { background: #EF4444; }
+    .bdots span:nth-child(2) { background: #F59E0B; }
+    .bdots span:nth-child(3) { background: #22C55E; }
+    .burl { flex: 1; text-align: center; font-size: 12px; color: var(--g400); font-weight: 500; }
+    .bbody { padding: 24px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 14px; background: var(--g100); border-radius: 8px; padding: 4px; width: fit-content; margin-left: auto; margin-right: auto; }
+    .tab { padding: 7px 18px; border-radius: 6px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: var(--g500); font-family: inherit; transition: all 0.15s; }
+    .tab.on { background: var(--white); color: var(--g900); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .panel { display: none; }
+    .panel.on { display: block; }
+
+    /* POLL */
+    .card { background: var(--white); border-radius: 10px; padding: 22px; max-width: 420px; margin: 0 auto; }
+    .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 7px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+    .tag-poll { color: var(--brand); background: var(--brand-bg); }
+    .tag-qa { color: var(--accent); background: var(--accent-bg); }
+    .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: var(--g900); line-height: 1.35; }
+    .opt { position: relative; overflow: hidden; background: var(--g50); border: 1px solid var(--g200); border-radius: 8px; padding: 11px 12px; margin-bottom: 7px; cursor: pointer; transition: all 0.2s; }
+    .opt.voted { border-color: var(--brand); background: var(--brand-bg); }
+    .opt-fill { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(15,118,110,0.07); border-radius: 8px; transition: width 1.2s cubic-bezier(0.25,1,0.5,1); width: 0; }
+    .opt-inner { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500; }
+    .opt-pct { font-weight: 700; color: var(--brand); opacity: 0; transition: opacity 0.4s; }
+    .meta { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 11px; color: var(--g400); }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22C55E; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    /* Q&A */
+    .qi { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--g100); }
+    .qi:last-of-type { border-bottom: none; }
+    .qv { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 32px; cursor: pointer; padding-top: 2px; }
+    .qa-arr { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid var(--g300); transition: border-color 0.15s; }
+    .qv.up .qa-arr { border-bottom-color: var(--accent); }
+    .qn { font-size: 13px; font-weight: 700; color: var(--g400); transition: color 0.15s; }
+    .qv.up .qn { color: var(--accent); }
+    .qt { font-size: 13px; color: var(--g700); line-height: 1.45; }
+    .qa-who { font-size: 11px; color: var(--g400); margin-top: 2px; }
+    .qa-row { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--g100); }
+    .qa-in { flex: 1; padding: 9px 10px; border: 1px solid var(--g200); border-radius: 6px; font-size: 12px; font-family: inherit; color: var(--g800); background: var(--g50); }
+    .qa-in::placeholder { color: var(--g400); }
+    .qa-go { padding: 9px 14px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+    /* PRESENTER */
+    .pres-card { background: var(--white); border-radius: 10px; padding: 22px; max-width: 480px; margin: 0 auto; }
+    .pres-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .pres-title { font-size: 13px; font-weight: 700; color: var(--g900); }
+    .pres-live { font-size: 10px; font-weight: 600; color: #22C55E; background: #F0FDF4; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
+    .pres-live::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #22C55E; animation: blink 2s infinite; }
+    .br { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .br-lbl { font-size: 12px; font-weight: 500; color: var(--g500); min-width: 100px; text-align: right; }
+    .br-track { flex: 1; height: 28px; background: var(--g100); border-radius: 5px; overflow: hidden; }
+    .br-fill { height: 100%; border-radius: 5px; transition: width 1.5s cubic-bezier(0.25,1,0.5,1); width: 0; }
+    .br-a { background: var(--brand); } .br-b { background: var(--brand-light); } .br-c { background: #6EE7B7; } .br-d { background: var(--g300); }
+    .br-v { font-size: 12px; font-weight: 700; color: var(--g700); min-width: 32px; opacity: 0; transition: opacity 0.5s; }
+    .pres-stats { display: flex; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--g100); }
+    .ps { text-align: center; flex: 1; }
+    .ps-n { font-size: 20px; font-weight: 800; color: var(--g900); }
+    .ps-l { font-size: 10px; color: var(--g400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* PHONES */
+    .phones { padding: 48px 0; text-align: center; }
+    .phones .label { font-size: 12px; font-weight: 600; color: var(--g400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+    .phone-row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .phone { width: 210px; background: var(--g900); border-radius: 24px; padding: 12px; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.2); }
+    .phone-notch { width: 72px; height: 6px; background: var(--g800); border-radius: 3px; margin: 0 auto 10px; }
+    .phone-screen { background: var(--white); border-radius: 14px; padding: 14px; overflow: hidden; }
+    .phone-url { font-size: 9px; color: var(--g400); text-align: center; margin-bottom: 8px; background: var(--g50); padding: 3px 6px; border-radius: 4px; }
+    .phone h4 { font-size: 12px; font-weight: 700; color: var(--g900); margin-bottom: 8px; line-height: 1.3; }
+    .ph-opt { background: var(--g50); border: 1px solid var(--g200); border-radius: 6px; padding: 7px 9px; margin-bottom: 4px; font-size: 11px; font-weight: 500; color: var(--g700); cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+    .ph-opt.sel { border-color: var(--brand); background: var(--brand-bg); }
+    .ph-opt-fill { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(15,118,110,0.06); border-radius: 6px; transition: width 0.8s ease; width: 0; }
+    .ph-opt span { position: relative; z-index: 1; }
+
+    /* FLOW */
+    .flow-section { padding: 48px 0; border-top: 1px solid var(--g200); }
+    .flow-section .label { font-size: 12px; font-weight: 600; color: var(--g400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; text-align: center; }
+    .flow { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: wrap; }
+    .flow-step { text-align: center; padding: 12px; flex: 0 0 auto; }
+    .flow-icon { width: 52px; height: 52px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 8px; }
+    .flow-step h4 { font-size: 13px; font-weight: 700; color: var(--g900); margin-bottom: 2px; }
+    .flow-step p { font-size: 11px; color: var(--g500); max-width: 110px; margin: 0 auto; }
+    .flow-arrow { color: var(--g300); font-size: 20px; padding: 0 4px; margin-top: 16px; }
+
+    /* STATS */
+    .stats { padding: 32px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; text-align: center; }
+    .stat-box { background: var(--g50); border: 1px solid var(--g200); border-radius: 10px; padding: 22px 14px; }
+    .stat-num { font-size: 30px; font-weight: 800; color: var(--brand); margin-bottom: 2px; }
+    .stat-lbl { font-size: 12px; color: var(--g500); font-weight: 500; }
+
+    /* PRICING */
+    .pricing { padding: 40px 0; }
+    .pricing-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 14px; }
+    .pc { background: var(--g50); border: 1.5px solid var(--g200); border-radius: 10px; padding: 20px; position: relative; }
+    .pc.pop { border-color: var(--brand); background: var(--white); box-shadow: 0 4px 16px rgba(15,118,110,0.08); }
+    .pc.pop::after { content: 'Best for most'; position: absolute; top: -9px; left: 14px; background: var(--brand); color: white; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .pc-name { font-size: 12px; font-weight: 600; color: var(--g500); margin-bottom: 2px; }
+    .pc-price { font-size: 28px; font-weight: 800; color: var(--g900); }
+    .pc-price span { font-size: 13px; font-weight: 500; color: var(--g400); }
+    .pc-note { font-size: 11px; color: var(--g400); margin-top: 1px; margin-bottom: 10px; }
+    .pc ul { list-style: none; }
+    .pc li { font-size: 12px; color: var(--g600); padding: 2px 0 2px 14px; position: relative; }
+    .pc li::before { content: ''; position: absolute; left: 0; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--brand); }
+
+    /* FINAL */
+    .final { padding: 56px 0 72px; text-align: center; border-top: 1px solid var(--g200); }
+    .final h2 { font-size: clamp(22px,3.5vw,30px); font-weight: 800; color: var(--g900); margin-bottom: 8px; }
+    .final > .wrap > p { font-size: 15px; color: var(--g500); margin-bottom: 24px; }
+    .signup-row { display: flex; gap: 8px; max-width: 380px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+    .signup-row input { flex: 1; min-width: 180px; padding: 13px 14px; border: 1.5px solid var(--g300); border-radius: 8px; font-size: 14px; font-family: inherit; color: var(--g800); outline: none; }
+    .signup-row input:focus { border-color: var(--brand); }
+    .signup-row input::placeholder { color: var(--g400); }
+    .signup-row button { padding: 13px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .signup-row button:hover { background: var(--accent-hover); }
+    .signup-ok { display: none; padding: 14px 20px; background: var(--brand-bg); border: 1px solid var(--brand-light); border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--brand-dark); max-width: 380px; margin: 0 auto; }
+
+    footer { padding: 20px; text-align: center; font-size: 12px; color: var(--g400); }
+    footer a { color: var(--g500); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .bbody { padding: 16px; }
+      .tabs { width: 100%; } .tab { flex: 1; text-align: center; font-size: 11px; padding: 7px 4px; }
+      .phone-row { flex-direction: column; align-items: center; }
+      .flow { flex-direction: column; align-items: center; } .flow-arrow { transform: rotate(90deg); margin-top: 0; padding: 4px 0; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .pricing-row { grid-template-columns: 1fr; }
+      .br-lbl { min-width: 60px; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="wordmark"><div class="wm-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 10V5.5a1.5 1.5 0 0 1 3 0V10" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10V5.5a1.5 1.5 0 0 1 3 0V10" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 14c-.8-1.5-1-3.5-.5-5.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/><path d="M18.5 14c.8-1.5 1-3.5.5-5.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/><path d="M6 16c0 3.3 2.7 5 6 5s6-1.7 6-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div> AskVote</div>
+    <h1>Your attendees have opinions. Hear&nbsp;them&nbsp;live.</h1>
+    <p class="lead">Live polls and Q&A for events. Scan a QR code. Get real engagement data.</p>
+    <a href="#get-access" class="cta-btn">Get early access</a>
+    <p class="cta-sub">Free to try. No credit card.</p>
+  </div>
+</section>
+
+<!-- DEMOS -->
+<section style="padding: 16px 0 48px;">
+  <div class="wrap">
+    <p style="font-size:12px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;text-align:center;">Click around — this is real</p>
+    <div class="tabs">
+      <button class="tab on" onclick="sw('poll')">Live Poll</button>
+      <button class="tab" onclick="sw('qa')">Q&A</button>
+      <button class="tab" onclick="sw('presenter')">Presenter View</button>
+    </div>
+    <div class="browser">
+      <div class="bbar">
+        <div class="bdots"><span></span><span></span><span></span></div>
+        <span class="burl" id="burl">askvote.io/e/your-event</span>
+      </div>
+      <div class="bbody">
+        <!-- POLL -->
+        <div class="panel on" id="p-poll">
+          <div class="card">
+            <div class="tag tag-poll">Live Poll</div>
+            <h3>Which session topic for next year's summit?</h3>
+            <div class="opt" data-pct="41" onclick="vote(this)"><div class="opt-fill"></div><div class="opt-inner"><span>AI in event production</span><span class="opt-pct">41%</span></div></div>
+            <div class="opt" data-pct="31" onclick="vote(this)"><div class="opt-fill"></div><div class="opt-inner"><span>Sustainable event planning</span><span class="opt-pct">31%</span></div></div>
+            <div class="opt" data-pct="19" onclick="vote(this)"><div class="opt-fill"></div><div class="opt-inner"><span>Hybrid & remote audiences</span><span class="opt-pct">19%</span></div></div>
+            <div class="opt" data-pct="9" onclick="vote(this)"><div class="opt-fill"></div><div class="opt-inner"><span>Sponsor activation strategies</span><span class="opt-pct">9%</span></div></div>
+            <div class="meta"><div class="live-dot"></div><span id="vc">312 votes</span><span>&middot; ends in 4:32</span></div>
+          </div>
+        </div>
+        <!-- Q&A -->
+        <div class="panel" id="p-qa">
+          <div class="card">
+            <div class="tag tag-qa">Audience Q&A</div>
+            <h3>Best questions rise to the top</h3>
+            <div class="qi"><div class="qv up" onclick="upv(this)"><div class="qa-arr"></div><span class="qn">24</span></div><div><div class="qt">Can you share the ROI framework for measuring event success?</div><div class="qa-who">Anonymous</div></div></div>
+            <div class="qi"><div class="qv" onclick="upv(this)"><div class="qa-arr"></div><span class="qn">18</span></div><div><div class="qt">How did you convince leadership to increase the event budget by 40%?</div><div class="qa-who">Marie L.</div></div></div>
+            <div class="qi"><div class="qv" onclick="upv(this)"><div class="qa-arr"></div><span class="qn">11</span></div><div><div class="qt">What's your approach to keeping hybrid attendees engaged?</div><div class="qa-who">Thomas K.</div></div></div>
+            <div class="qi"><div class="qv" onclick="upv(this)"><div class="qa-arr"></div><span class="qn">6</span></div><div><div class="qt">Which sponsors had the best activation, and why?</div><div class="qa-who">Sarah D.</div></div></div>
+            <div class="qa-row"><input type="text" class="qa-in" placeholder="Type your question..."><button class="qa-go" onclick="askQ(this)">Ask</button></div>
+          </div>
+        </div>
+        <!-- PRESENTER -->
+        <div class="panel" id="p-presenter">
+          <div class="pres-card">
+            <div class="pres-top"><div class="pres-title">Presenter Dashboard</div><div class="pres-live">Live</div></div>
+            <div class="br"><div class="br-lbl">AI in production</div><div class="br-track"><div class="br-fill br-a" data-w="82%"></div></div><div class="br-v">41%</div></div>
+            <div class="br"><div class="br-lbl">Sustainable events</div><div class="br-track"><div class="br-fill br-b" data-w="62%"></div></div><div class="br-v">31%</div></div>
+            <div class="br"><div class="br-lbl">Hybrid audiences</div><div class="br-track"><div class="br-fill br-c" data-w="38%"></div></div><div class="br-v">19%</div></div>
+            <div class="br"><div class="br-lbl">Sponsor activation</div><div class="br-track"><div class="br-fill br-d" data-w="18%"></div></div><div class="br-v">9%</div></div>
+            <div class="pres-stats">
+              <div class="ps"><div class="ps-n" id="sv">312</div><div class="ps-l">Votes</div></div>
+              <div class="ps"><div class="ps-n">89%</div><div class="ps-l">Participation</div></div>
+              <div class="ps"><div class="ps-n">47</div><div class="ps-l">Questions</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MID CTA -->
+<div style="text-align:center;padding:8px 0 40px;">
+  <a href="#get-access" class="cta-btn cta-sm">Get early access</a>
+</div>
+
+<!-- PHONES -->
+<section class="phones" style="border-top:1px solid var(--g200);">
+  <div class="wrap">
+    <p class="label">What your attendees see on their phone</p>
+    <div class="phone-row">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-url">askvote.io/e/summit-26</div>
+          <h4>Rate this session</h4>
+          <div class="ph-opt sel" onclick="phV(this)" data-pw="85%"><div class="ph-opt-fill"></div><span>Loved it</span></div>
+          <div class="ph-opt" onclick="phV(this)" data-pw="60%"><div class="ph-opt-fill"></div><span>Pretty good</span></div>
+          <div class="ph-opt" onclick="phV(this)" data-pw="20%"><div class="ph-opt-fill"></div><span>Meh</span></div>
+          <div class="ph-opt" onclick="phV(this)" data-pw="5%"><div class="ph-opt-fill"></div><span>Not great</span></div>
+          <div class="meta" style="margin-top:8px"><div class="live-dot"></div><span>183 responses</span></div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-url">askvote.io/e/summit-26</div>
+          <h4>Ask a question</h4>
+          <div style="background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:9px;margin-bottom:6px;">
+            <div style="font-size:11px;color:var(--g700);line-height:1.4;">How do you measure attendee satisfaction beyond surveys?</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:5px;"><svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,7 0,7" fill="#EA580C"/></svg><span style="font-size:11px;font-weight:700;color:var(--accent);">12</span></div>
+          </div>
+          <div style="background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:9px;">
+            <div style="font-size:11px;color:var(--g700);line-height:1.4;">What tools do you use for post-event follow-up?</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:5px;"><svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,7 0,7" fill="#D1D5DB"/></svg><span style="font-size:11px;font-weight:700;color:var(--g400);">7</span></div>
+          </div>
+          <div class="meta" style="margin-top:8px"><div class="live-dot"></div><span>34 questions</span></div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-url">askvote.io/e/summit-26</div>
+          <h4>Word Cloud</h4>
+          <div style="text-align:center;padding:6px 0;line-height:1.9;">
+            <span style="font-size:20px;font-weight:800;color:var(--brand);">engagement</span>
+            <span style="font-size:14px;font-weight:600;color:var(--brand-light);">networking</span>
+            <span style="font-size:17px;font-weight:700;color:var(--accent);">content</span>
+            <span style="font-size:10px;font-weight:500;color:var(--g400);">venue</span>
+            <span style="font-size:13px;font-weight:600;color:#7C3AED;">speakers</span>
+            <span style="font-size:10px;font-weight:500;color:var(--g400);">catering</span>
+            <span style="font-size:15px;font-weight:700;color:var(--brand);">interactive</span>
+            <span style="font-size:11px;font-weight:500;color:var(--g500);">hybrid</span>
+            <span style="font-size:12px;font-weight:600;color:var(--accent);">ROI</span>
+          </div>
+          <div class="meta" style="margin-top:4px"><div class="live-dot"></div><span>256 responses</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<section class="flow-section">
+  <div class="wrap">
+    <p class="label">How it works</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-icon" style="background:var(--brand-bg);"><svg width="24" height="24" fill="none" stroke="var(--brand)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg></div>
+        <h4>Create event</h4>
+        <p>Add polls & Q&A. 2 minutes.</p>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:var(--accent-bg);"><svg width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 6h2v2H8zM14 6h2v2h-2zM8 14h2v2H8zM14 14h2v2h-2zM11 10h2v2h-2z"/></svg></div>
+        <h4>Show QR code</h4>
+        <p>Attendees scan & join.</p>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#EDE9FE;"><svg width="24" height="24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h4>Go live</h4>
+        <p>Real-time votes & questions.</p>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#FEF3C7;"><svg width="24" height="24" fill="none" stroke="#D97706" stroke-width="2"><path d="M12 20V10M6 20V14M18 20V4"/></svg></div>
+        <h4>Get the data</h4>
+        <p>Export. Show sponsors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="a1">0s</div><div class="stat-lbl">Setup time</div></div>
+      <div class="stat-box"><div class="stat-num" id="a2">0%</div><div class="stat-lbl">Avg. participation</div></div>
+      <div class="stat-box"><div class="stat-num">$49</div><div class="stat-lbl">Per event. Not per year.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:20px;">
+      <p style="font-size:12px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pricing</p>
+      <p style="font-size:14px;color:var(--g500);">Pay per event. No subscriptions. No "contact sales."</p>
+    </div>
+    <div class="pricing-row">
+      <div class="pc">
+        <div class="pc-name">Free</div><div class="pc-price">$0</div><div class="pc-note">No credit card</div>
+        <ul><li>50 participants</li><li>3 polls per event</li><li>Q&A with upvoting</li><li>Live results</li></ul>
+      </div>
+      <div class="pc pop">
+        <div class="pc-name">Pro</div><div class="pc-price">$49 <span>/ event</span></div><div class="pc-note">For real events</div>
+        <ul><li>1,000 participants</li><li>Unlimited polls & Q&A</li><li>Moderation & branding</li><li>Full analytics & export</li></ul>
+      </div>
+      <div class="pc">
+        <div class="pc-name">Custom</div><div class="pc-price">Let's talk</div><div class="pc-note">White-label, API</div>
+        <ul><li>Unlimited everything</li><li>Your brand, your domain</li><li>API & CRM integration</li><li>Priority support</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final" id="get-access">
+  <div class="wrap">
+    <h2>Make your next event the one people talk&nbsp;about</h2>
+    <p>First 100 organizers get a free Pro event.</p>
+    <form class="signup-row" id="sf" onsubmit="signup(event)">
+      <input type="email" placeholder="you@company.com" required>
+      <button type="submit">Join waitlist</button>
+    </form>
+    <div class="signup-ok" id="sok">You're in. We'll be in touch.</div>
+    <p class="cta-sub" style="text-align:center;">No spam. Just launch updates.</p>
+  </div>
+</section>
+
+<footer>AskVote &middot; <a href="mailto:hello@askvote.io">hello@askvote.io</a></footer>
+
+<script>
+  function sw(n){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));event.target.classList.add('on');document.getElementById('p-'+n).classList.add('on');const u={poll:'askvote.io/e/your-event',qa:'askvote.io/e/your-event/qa',presenter:'askvote.io/e/your-event/presenter'};document.getElementById('burl').textContent=u[n];if(n==='presenter')animPres();if(n==='poll'&&!pD)animPoll();}
+  let pD=false;
+  function animPoll(){document.querySelectorAll('#p-poll .opt').forEach((o,i)=>{setTimeout(()=>{o.querySelector('.opt-fill').style.width=o.dataset.pct+'%';o.querySelector('.opt-pct').style.opacity='1';},200+i*150);});pD=true;}
+  function vote(el){el.closest('.panel').querySelectorAll('.opt').forEach(o=>o.classList.remove('voted'));el.classList.add('voted');const c=document.getElementById('vc'),n=parseInt(c.textContent)+1;c.textContent=n+' votes';document.getElementById('sv').textContent=n;if(!pD)animPoll();}
+  function upv(el){const c=el.querySelector('.qn'),n=parseInt(c.textContent);if(el.classList.contains('up')){el.classList.remove('up');c.textContent=n-1;}else{el.classList.add('up');c.textContent=n+1;}const card=el.closest('.card'),items=[...card.querySelectorAll('.qi')],row=card.querySelector('.qa-row');items.sort((a,b)=>parseInt(b.querySelector('.qn').textContent)-parseInt(a.querySelector('.qn').textContent));items.forEach(i=>card.insertBefore(i,row));}
+  function askQ(btn){const inp=btn.previousElementSibling;if(!inp.value.trim())return;const card=btn.closest('.card'),row=card.querySelector('.qa-row');const d=document.createElement('div');d.className='qi';d.innerHTML='<div class="qv" onclick="upv(this)"><div class="qa-arr"></div><span class="qn">1</span></div><div><div class="qt">'+inp.value.replace(/</g,'&lt;')+'</div><div class="qa-who">You</div></div>';card.insertBefore(d,row);inp.value='';}
+  function animPres(){setTimeout(()=>{document.querySelectorAll('.br-fill').forEach((b,i)=>{setTimeout(()=>{b.style.width=b.dataset.w;},i*120);});document.querySelectorAll('.br-v').forEach((v,i)=>{setTimeout(()=>{v.style.opacity='1';},400+i*120);});},100);}
+  function phV(el){el.closest('.phone-screen').querySelectorAll('.ph-opt').forEach(o=>{o.classList.remove('sel');o.querySelector('.ph-opt-fill').style.width=o.dataset.pw||'0%';});el.classList.add('sel');el.querySelector('.ph-opt-fill').style.width=el.dataset.pw||'0%';}
+  const so=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){animC('a1',0,120,'s');animC('a2',0,89,'%');so.disconnect();}});},{threshold:0.5});const sg=document.querySelector('.stats-grid');if(sg)so.observe(sg);
+  function animC(id,f,t,s){const el=document.getElementById(id);if(!el)return;let c=f;const st=Math.ceil(t/30);const iv=setInterval(()=>{c+=st;if(c>=t){c=t;clearInterval(iv);}el.textContent=c+s;},30);}
+  const po=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting&&!pD)animPoll();});},{threshold:0.4});po.observe(document.getElementById('p-poll'));
+  function signup(e){e.preventDefault();document.getElementById('sf').style.display='none';document.getElementById('sok').style.display='block';}
+</script>
+</body>
+</html>
